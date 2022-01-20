@@ -281,6 +281,14 @@ export class NgxChessBoardComponent
         this.engineFacade.addPiece(pieceTypeInput, colorInput, coords);
     }
 
+    addArrow(coords: string) {
+        this.engineFacade.addArrow(coords);
+    }
+
+    removeArrow(coords: string) {
+        this.engineFacade.removeArrow(coords);
+    }
+
     getPGN() {
         return this.engineFacade.pgnProcessor.getPGN();
     }

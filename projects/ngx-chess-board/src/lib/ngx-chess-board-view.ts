@@ -19,4 +19,8 @@ export interface NgxChessBoardView {
     setPGN(pgn: string): void;
 
     addPiece(pieceTypeInput: PieceTypeInput, colorInput: ColorInput, coords: string);
+
+    addArrow(coords: string);
+
+    removeArrow(coords: string);
 }

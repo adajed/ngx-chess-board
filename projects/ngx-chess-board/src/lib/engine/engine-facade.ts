@@ -645,4 +645,52 @@ export class EngineFacade extends AbstractEngineFacade {
             this.afterMoveActions();
         }
     }
+
+    addArrow(coords: string) {
+        if (coords) {
+            const source = this.getDrawPointByIndexes(
+                MoveUtils.translateCoordsToIndex(coords.substring(0, 2),
+                                                 this.board.reverted));
+            const dest = this.getDrawPointByIndexes(
+                MoveUtils.translateCoordsToIndex(coords.substring(2, 4),
+                                                 this.board.reverted));
+
+            const arrow = new Arrow();
+            arrow.start = source;
+            arrow.end = dest;
+
+            if (!this.drawProvider.containsArrow(arrow)) {
+                this.drawProvider.addArrow(arrow);
+            }
+        }
+    }
+
+    removeArrow(coords: string) {
+        if (coords) {
+            const source = this.getDrawPointByIndexes(
+                MoveUtils.translateCoordsToIndex(coords.substring(0, 2),
+                                                 this.board.reverted));
+            const dest = this.getDrawPointByIndexes(
+                MoveUtils.translateCoordsToIndex(coords.substring(2, 4),
+                                                 this.board.reverted));
+
+            const arrow = new Arrow();
+            arrow.start = source;
+            arrow.end = dest;
+
+            if (this.drawProvider.containsArrow(arrow)) {
+                this.drawProvider.removeArrow(arrow);
+            }
+        }
+    }
+
+    getDrawPointByIndexes(indexes) {
+        let color = this.colorStrategy.resolve(false, false, false);
+        let squareSize = this.heightAndWidth / 8;
+        return new DrawPoint(
+            Math.floor(indexes.xAxis * squareSize + squareSize / 2),
+            Math.floor(indexes.yAxis * squareSize + squareSize / 2),
+            color
+        );
+    }
 }

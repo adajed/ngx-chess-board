@@ -73,6 +73,10 @@ export abstract class AbstractEngineFacade {
         top?: number
     ): void;
 
+    public abstract addArrow(coords: string): void;
+
+    public abstract removeArrow(coords: string): void;
+
     public checkIfPawnFirstMove(piece: Piece) {
         if (piece instanceof Pawn) {
             piece.isMovedAlready = true;
