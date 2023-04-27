@@ -24,6 +24,7 @@ import { PiecePromotionResolver } from '../piece-promotion/piece-promotion-resol
 import { MoveUtils } from '../utils/move-utils';
 import { MoveChange } from './outputs/move-change/move-change';
 import { PieceFactory } from './utils/piece-factory';
+import { MoveTranslation } from '../models/move-translation';
 
 export class EngineFacade extends AbstractEngineFacade {
 
@@ -33,15 +34,21 @@ export class EngineFacade extends AbstractEngineFacade {
     boardStateProvider: BoardStateProvider;
     moveStateProvider: MoveStateProvider;
     moveChange: EventEmitter<MoveChange>;
+    circleChange: EventEmitter<string>;
+    arrowChange: EventEmitter<string>;
 
     private historyMoveCandidate: HistoryMove;
 
     constructor(
         board: Board,
-        moveChange: EventEmitter<MoveChange>
+        moveChange: EventEmitter<MoveChange>,
+        circleChange: EventEmitter<string>,
+        arrowChange: EventEmitter<string>
     ) {
         super(board);
         this.moveChange = moveChange;
+        this.circleChange = circleChange;
+        this.arrowChange = arrowChange;
         this.boardLoader = new BoardLoader(this);
         this.boardLoader.addPieces();
         this.boardStateProvider = new BoardStateProvider();
@@ -596,8 +603,9 @@ export class EngineFacade extends AbstractEngineFacade {
             if (!this.drawProvider.containsCircle(circle)) {
                 this.drawProvider.addCircle(circle);
             } else {
-                this.drawProvider.reomveCircle(circle);
+                this.drawProvider.removeCircle(circle);
             }
+            this.circleChange.emit(this.getStringByDrawPoint(upPoint));
         } else {
             const arrow = new Arrow();
             arrow.start = this.drawPoint;
@@ -608,6 +616,7 @@ export class EngineFacade extends AbstractEngineFacade {
             } else {
                 this.drawProvider.removeArrow(arrow);
             }
+            this.arrowChange.emit(this.getStringByDrawPoint(this.drawPoint) + this.getStringByDrawPoint(upPoint));
         }
     }
 
@@ -646,14 +655,16 @@ export class EngineFacade extends AbstractEngineFacade {
         }
     }
 
-    addArrow(coords: string) {
+    addArrow(coords: string, color: string) {
         if (coords) {
             const source = this.getDrawPointByIndexes(
                 MoveUtils.translateCoordsToIndex(coords.substring(0, 2),
-                                                 this.board.reverted));
+                                                 this.board.reverted),
+                color);
             const dest = this.getDrawPointByIndexes(
                 MoveUtils.translateCoordsToIndex(coords.substring(2, 4),
-                                                 this.board.reverted));
+                                                 this.board.reverted),
+                color);
 
             const arrow = new Arrow();
             arrow.start = source;
@@ -684,13 +695,48 @@ export class EngineFacade extends AbstractEngineFacade {
         }
     }
 
-    getDrawPointByIndexes(indexes) {
-        let color = this.colorStrategy.resolve(false, false, false);
-        let squareSize = this.heightAndWidth / 8;
+    addCircle(coords: string, color: string) {
+        if (coords) {
+            const source = this.getDrawPointByIndexes(
+                MoveUtils.translateCoordsToIndex(coords.substring(0, 2),
+                                                 this.board.reverted),
+                color);
+            const circle = new Circle();
+            circle.drawPoint = source;
+            if (!this.drawProvider.containsCircle(circle)) {
+                this.drawProvider.addCircle(circle);
+            }
+        }
+    }
+
+    removeCircle(coords: string) {
+        if (coords) {
+            const source = this.getDrawPointByIndexes(
+                MoveUtils.translateCoordsToIndex(coords.substring(0, 2),
+                                                 this.board.reverted));
+            const circle = new Circle();
+            circle.drawPoint = source;
+            if (this.drawProvider.containsCircle(circle)) {
+                this.drawProvider.removeCircle(circle);
+            }
+        }
+    }
+
+    getDrawPointByIndexes(indexes: MoveTranslation, color: string = 'red') {
+        const squareSize = this.heightAndWidth / 8;
         return new DrawPoint(
             Math.floor(indexes.xAxis * squareSize + squareSize / 2),
             Math.floor(indexes.yAxis * squareSize + squareSize / 2),
             color
         );
+    }
+
+    getStringByDrawPoint(drawPoint: DrawPoint): string {
+        const squareSize = this.heightAndWidth / 8;
+        const row = this.board.reverted ? "12345678" : "87654321" ;
+        const file = this.board.reverted ? "hgfedcba" : "abcdefgh";
+        const fileIndex = Math.floor(drawPoint.x / squareSize);
+        const rowIndex = Math.floor(drawPoint.y / squareSize);
+        return file[fileIndex] + row[rowIndex];
     }
 }

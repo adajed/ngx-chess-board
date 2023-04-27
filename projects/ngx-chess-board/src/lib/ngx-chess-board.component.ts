@@ -56,6 +56,8 @@ export class NgxChessBoardComponent
     @Output() moveChange = new EventEmitter<MoveChange>();
     @Output() checkmate = new EventEmitter<void>();
     @Output() stalemate = new EventEmitter<void>();
+    @Output() circleChange = new EventEmitter<string>();
+    @Output() arrowChange = new EventEmitter<string>();
 
     @ViewChild('boardRef')
     boardRef: ElementRef;
@@ -74,7 +76,9 @@ export class NgxChessBoardComponent
     constructor(private ngxChessBoardService: NgxChessBoardService) {
         this.engineFacade = new EngineFacade(
             new Board(),
-            this.moveChange
+            this.moveChange,
+            this.circleChange,
+            this.arrowChange
         );
     }
 
@@ -281,12 +285,20 @@ export class NgxChessBoardComponent
         this.engineFacade.addPiece(pieceTypeInput, colorInput, coords);
     }
 
-    addArrow(coords: string) {
-        this.engineFacade.addArrow(coords);
+    addArrow(coords: string, color: string) {
+        this.engineFacade.addArrow(coords, color);
     }
 
     removeArrow(coords: string) {
         this.engineFacade.removeArrow(coords);
+    }
+
+    addCircle(coords: string, color: string) {
+        this.engineFacade.addCircle(coords, color);
+    }
+
+    removeCircle(coords: string) {
+        this.engineFacade.removeCircle(coords);
     }
 
     getPGN() {

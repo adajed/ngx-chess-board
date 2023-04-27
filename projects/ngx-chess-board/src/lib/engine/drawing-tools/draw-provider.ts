@@ -29,7 +29,7 @@ export class DrawProvider {
         this.circles = [...this.circles, circle];
     }
 
-    reomveCircle(removeCircle: Circle) {
+    removeCircle(removeCircle: Circle) {
         this.circles = this.circles.filter((circle) => !circle.isEqual(removeCircle));
     }
 
