@@ -389,11 +389,15 @@ export class EngineFacade extends AbstractEngineFacade {
         if (toMovePiece instanceof Pawn) {
             this.board.checkIfPawnTakesEnPassant(newPoint);
             this.board.checkIfPawnEnpassanted(toMovePiece, newPoint);
-            ++this.board.pawnMoveCount;
+            this.board.pawnMoveCount = 0;
         } else {
             this.board.enPassantPoint = null;
             this.board.enPassantPiece = null;
-            this.board.pawnMoveCount = 0;
+            if (destPiece) {
+                this.board.pawnMoveCount = 0;
+            } else {
+                ++this.board.pawnMoveCount;
+            }
         }
 
         toMovePiece.point = newPoint;
