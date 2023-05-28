@@ -173,9 +173,10 @@ export class DefaultFenProcessor implements NotationProcessor {
 
             this.setCurrentPlayer(engineFacade.board, fen);
             this.setCastles(engineFacade.board, fen);
-            this.setEnPassant(fen);
-            this.setFullMoveCount(fen);
-            engineFacade.board.fen = fen;
+            this.setEnPassant(engineFacade.board, fen);
+            this.setPawnMoveCount(engineFacade.board, fen);
+            this.setFullMoveCount(engineFacade.board, fen);
+            engineFacade.board.calculateFEN();
         } else {
             throw Error('Incorrect FEN provided');
         }
@@ -212,9 +213,23 @@ export class DefaultFenProcessor implements NotationProcessor {
         }
     }
 
-    private setFullMoveCount(fen: string) {}
+    private setPawnMoveCount(board: Board, fen: string) {
+        if (fen) {
+            const split = fen.split(' ');
+            const pawnMoveCount = split[4];
+            board.pawnMoveCount = Number(pawnMoveCount);
+        }
+    }
 
-    private setEnPassant(fen: string) {
+    private setFullMoveCount(board: Board, fen: string) {
+        if (fen) {
+            const split = fen.split(' ');
+            const fullMoveCount = split[5];
+            board.fullMoveCount = Number(fullMoveCount);
+        }
+    }
+
+    private setEnPassant(board: Board, fen: string) {
         if (fen) {
             const split = fen.split(' ');
             const enPassantPoint = split[3];
@@ -223,7 +238,10 @@ export class DefaultFenProcessor implements NotationProcessor {
                 return;
             }
 
-            // if()
+            board.enPassantPoint = new Point('8'.charCodeAt(0) - enPassantPoint[1].charCodeAt(0),
+                                             enPassantPoint[0].charCodeAt(0) - 'a'.charCodeAt(0));
+            board.enPassantPiece = board.getPieceByField(board.enPassantPoint.row + (board.currentWhitePlayer ? 1 : -1),
+                                                         board.enPassantPoint.col);
         }
     }
 

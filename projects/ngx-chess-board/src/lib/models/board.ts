@@ -26,6 +26,7 @@ export class Board {
 
     currentWhitePlayer = true;
     reverted = false;
+    pawnMoveCount = 1;
     fullMoveCount = 1;
     fen: string;
 
@@ -78,11 +79,12 @@ export class Board {
         this.currentWhitePlayer = true;
         this.enPassantPoint = null;
         this.enPassantPiece = null;
+        this.pawnMoveCount = 0;
         this.fullMoveCount = 1;
         this.calculateFEN();
     }
 
-        reverse() {
+    reverse() {
         this.reverted = !this.reverted;
         this.activePiece = null;
         this.possibleMoves = [];
@@ -245,16 +247,16 @@ export class Board {
         }
 
         fen += ' ' + (this.currentWhitePlayer ? 'w' : 'b');
-        const whiteEnPassant = this.getCastleFENString(Color.WHITE);
-        const blackEnPassant = this.getCastleFENString(Color.BLACK);
-        let concatedEnPassant = whiteEnPassant + blackEnPassant;
-        if (!concatedEnPassant) {
-            concatedEnPassant = '-';
+        const whiteCastle = this.getCastleFENString(Color.WHITE);
+        const blackCastle = this.getCastleFENString(Color.BLACK);
+        let castleString = whiteCastle + blackCastle;
+        if (!castleString) {
+            castleString = '-';
         }
 
-        fen += ' ' + concatedEnPassant;
+        fen += ' ' + castleString;
         fen += ' ' + this.getEnPassantFENString();
-        fen += ' ' + 0;
+        fen += ' ' + this.pawnMoveCount;
         fen += ' ' + this.fullMoveCount;
         this.fen = fen;
     }
