@@ -39,6 +39,9 @@ export class EngineFacade extends AbstractEngineFacade {
 
     private historyMoveCandidate: HistoryMove;
 
+    private moveSound = new Audio("../../../assets/sounds/Move.mp3");
+    private captureSound = new Audio("../../../assets/sounds/Capture.mp3");
+
     constructor(
         board: Board,
         moveChange: EventEmitter<MoveChange>,
@@ -52,6 +55,9 @@ export class EngineFacade extends AbstractEngineFacade {
         this.boardLoader = new BoardLoader(this);
         this.boardLoader.addPieces();
         this.boardStateProvider = new BoardStateProvider();
+
+        this.moveSound.load();
+        this.captureSound.load();
     }
 
     public reset(): void {
@@ -118,14 +124,11 @@ export class EngineFacade extends AbstractEngineFacade {
 
                 this.prepareActivePiece(srcPiece, srcPiece.point);
 
-                if (
-                    this.board.isPointInPossibleMoves(
-                        new Point(destIndexes.yAxis, destIndexes.xAxis)
-                    ) ||
-                    this.board.isPointInPossibleCaptures(
-                        new Point(destIndexes.yAxis, destIndexes.xAxis)
-                    )
-                ) {
+                const isLegalMove = this.board.isPointInPossibleMoves(
+                        new Point(destIndexes.yAxis, destIndexes.xAxis));
+                const isLegalCapture = this.board.isPointInPossibleCaptures(
+                        new Point(destIndexes.yAxis, destIndexes.xAxis));
+                if (isLegalMove || isLegalCapture) {
                     this.saveClone();
                     this.movePiece(
                         srcPiece,
@@ -142,13 +145,20 @@ export class EngineFacade extends AbstractEngineFacade {
                         destIndexes.xAxis
                     );
 
-                    this.disableSelection();
-                } else {
-                    this.disableSelection();
+                    this.playSound(isLegalCapture);
                 }
+                this.disableSelection();
             }
         }
 
+    }
+
+    playSound(isCapture: boolean) {
+        if (isCapture) {
+            this.captureSound.play();
+        } else {
+            this.moveSound.play();
+        }
     }
 
     prepareActivePiece(pieceClicked: Piece, pointClicked: Point) {
@@ -354,6 +364,8 @@ export class EngineFacade extends AbstractEngineFacade {
                 return;
             }
         }
+
+        this.playSound(destPiece !== undefined);
 
         this.historyMoveCandidate = new HistoryMove(
             MoveUtils.format(toMovePiece.point, newPoint, this.board.reverted),

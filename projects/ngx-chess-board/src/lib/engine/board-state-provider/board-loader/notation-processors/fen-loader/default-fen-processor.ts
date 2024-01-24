@@ -16,6 +16,10 @@ export class DefaultFenProcessor implements NotationProcessor {
     public process(notation: string, engineFacade: AbstractEngineFacade): void {
         let fen = notation;
         if (notation) {
+            engineFacade.board.whiteKingChecked = false;
+            engineFacade.board.blackKingChecked = false;
+            engineFacade.board.lastMoveSrc = null;
+            engineFacade.board.lastMoveDest = null;
             engineFacade.board.reverted = false;
             engineFacade.board.pieces = [];
             const split = fen.split('/');
